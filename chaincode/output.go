@@ -276,14 +276,16 @@ func (out *outputTesttuple) Fill(db LedgerDB, key string, in Testtuple) error {
 }
 
 type outputModelDetails struct {
-	Traintuple             outputTraintuple  `json:"traintuple"`
-	Testtuple              outputTesttuple   `json:"testtuple"`
-	NonCertifiedTesttuples []outputTesttuple `json:"nonCertifiedTesttuples"`
+	CompositeTraintuple    *outputCompositeTraintuple `json:"compositeTraintuple,omitempty"`
+	Traintuple             *outputTraintuple          `json:"traintuple,omitempty"`
+	Testtuple              outputTesttuple            `json:"testtuple"`
+	NonCertifiedTesttuples []outputTesttuple          `json:"nonCertifiedTesttuples"`
 }
 
 type outputModel struct {
-	Traintuple outputTraintuple `json:"traintuple"`
-	Testtuple  outputTesttuple  `json:"testtuple"`
+	CompositeTraintuple *outputCompositeTraintuple `json:"compositeTraintuple,omitempty"`
+	Traintuple          *outputTraintuple          `json:"traintuple,omitempty"`
+	Testtuple           outputTesttuple            `json:"testtuple"`
 }
 
 // TuplesEvent is the collection of tuples sent in an event
