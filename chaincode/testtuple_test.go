@@ -123,7 +123,37 @@ func TestTesttupleOnCompositeTraintuple(t *testing.T) {
 	inp := inputTesttuple{
 		TraintupleKey: compositeTraintupleKey,
 	}
+	// Create a testtuple before training
 	args := inp.createDefault()
 	resp := mockStub.MockInvoke("42", args)
 	assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
+	values := map[string]string{}
+	bytesToStruct(resp.Payload, &values)
+	testTupleKey := values["key"]
+
+	// Start and succeed training
+	mockStub.MockTransactionStart("42")
+	db := NewLedgerDB(mockStub)
+	_, err := logStartCompositeTrain(db, assetToArgs(inputHash{Key: compositeTraintupleKey}))
+	assert.NoError(t, err)
+	inLog := inputLogSuccessCompositeTrain{}
+	inLog.createDefault()
+	_, err = logSuccessCompositeTrain(db, assetToArgs(inLog))
+	assert.NoError(t, err)
+
+	testTuple, err := queryTesttuple(db, assetToArgs(inputHash{Key: testTupleKey}))
+	assert.Equal(t, StatusTodo, testTuple.Status)
+
+	// Create a testtuple after a successful training
+	inp.DataManagerKey = dataManagerOpenerHash
+	inp.DataSampleKeys = []string{trainDataSampleHash1}
+	args = inp.createDefault()
+	resp = mockStub.MockInvoke("42", args)
+	assert.EqualValues(t, http.StatusOK, resp.Status, resp.Message)
+	values = map[string]string{}
+	bytesToStruct(resp.Payload, &values)
+	testTupleKey = values["key"]
+
+	testTuple, err = queryTesttuple(db, assetToArgs(inputHash{Key: testTupleKey}))
+	assert.Equal(t, StatusTodo, testTuple.Status)
 }
